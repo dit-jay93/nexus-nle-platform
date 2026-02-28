@@ -1,0 +1,118 @@
+name: Build NEXUS
+
+# 트리거: main 푸시 / v* 태그 / 수동 실행
+on:
+  push:
+    branches: [ main ]
+    tags:     [ 'v*' ]
+  workflow_dispatch:
+
+jobs:
+  # ─────────────────────────────────────────────
+  # 플랫폼별 바이너리 빌드
+  # ─────────────────────────────────────────────
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            label: Windows
+            artifact: NEXUS-Windows.zip
+
+          - os: macos-13          # Intel x86_64 (Rosetta 2로 Apple Silicon도 실행 가능)
+            label: macOS-Intel
+            artifact: NEXUS-macOS-Intel.zip
+
+          - os: macos-latest      # Apple Silicon arm64 (M1/M2/M3 네이티브)
+            label: macOS-AppleSilicon
+            artifact: NEXUS-macOS-AppleSilicon.zip
+
+    runs-on: ${{ matrix.os }}
+    name: Build · ${{ matrix.label }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.12
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install dependencies
+        run: pip install -r requirements.txt
+
+      # ── Windows 빌드 ──────────────────────────
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          pyinstaller `
+            --onedir `
+            --windowed `
+            --name NEXUS `
+            --clean `
+            main.py
+        shell: pwsh
+
+      - name: Zip artifact (Windows)
+        if: runner.os == 'Windows'
+        run: Compress-Archive -Path dist\NEXUS -DestinationPath NEXUS-Windows.zip
+        shell: pwsh
+
+      # ── macOS 빌드 ────────────────────────────
+      - name: Build (macOS)
+        if: runner.os == 'macOS'
+        run: |
+          pyinstaller \
+            --onedir \
+            --windowed \
+            --name NEXUS \
+            --osx-bundle-identifier com.nexus.nleplatform \
+            --clean \
+            main.py
+
+      - name: Zip artifact (macOS Intel)
+        if: matrix.os == 'macos-13'
+        run: cd dist && zip -r ../NEXUS-macOS-Intel.zip NEXUS.app
+
+      - name: Zip artifact (macOS Apple Silicon)
+        if: matrix.os == 'macos-latest'
+        run: cd dist && zip -r ../NEXUS-macOS-AppleSilicon.zip NEXUS.app
+
+      # ── 아티팩트 업로드 ───────────────────────
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.label }}
+          path: ${{ matrix.artifact }}
+          retention-days: 30
+
+  # ─────────────────────────────────────────────
+  # v* 태그 푸시 시 → GitHub Release 자동 생성
+  # ─────────────────────────────────────────────
+  release:
+    needs: build
+    if: startsWith(github.ref, 'refs/tags/v')
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: artifacts
+
+      - name: List artifacts
+        run: find artifacts -type f | sort
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          name: "NEXUS ${{ github.ref_name }}"
+          generate_release_notes: true
+          files: |
+            artifacts/Windows/NEXUS-Windows.zip
+            artifacts/macOS-Intel/NEXUS-macOS-Intel.zip
+            artifacts/macOS-AppleSilicon/NEXUS-macOS-AppleSilicon.zip

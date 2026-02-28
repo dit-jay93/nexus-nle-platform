@@ -15,7 +15,7 @@ from pathlib import Path
 
 APP_NAME    = "NEXUS"
 APP_TAGLINE = "NLE 통합 관제 플랫폼"
-APP_VERSION = "1.0.0"
+APP_VERSION = "1.1.0"
 RECENT_LIMIT = 10  # 최근 프로젝트 표시 최대 개수
 
 from PyQt6.QtWidgets import (

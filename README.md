@@ -40,8 +40,7 @@ NLE 실행 전에 프로젝트 폴더 구조를 자동 생성하고, DaVinci Res
 | 파일 | 플랫폼 |
 |------|--------|
 | `NEXUS-Windows.zip` | Windows 10/11 (x64) |
-| `NEXUS-macOS-AppleSilicon.zip` | macOS (M1 / M2 / M3) |
-| `NEXUS-macOS-Intel.zip` | macOS (Intel, Rosetta 2 지원) |
+| `NEXUS-macOS-AppleSilicon.zip` | macOS (M1 / M2 / M3 / M4) |
 
 ### 소스에서 실행
 
@@ -78,4 +77,21 @@ DaVinci Resolve 설치 시 자동으로 포함됩니다.
 - **UI**: PyQt6
 - **번들링**: PyInstaller (macOS `.app` / Windows `.exe`)
 - **데이터 저장**: JSON (`~/Library/Application Support/VideoProjectSetup/`)
-- **CI/CD**: GitHub Actions (Windows / macOS Intel+AppleSilicon 자동 빌드)
+- **CI/CD**: GitHub Actions (Windows / macOS Apple Silicon 자동 빌드)
+
+---
+
+## Changelog
+
+### v1.1.0
+- **Resolve 기술 스펙 자동 적용** — 해상도, FPS, 색상 공간, 샘플 레이트를 프로젝트 생성 시 Resolve API로 직접 설정
+- **스마트 스냅샷** — Resolve 실행 중이면 현재 작업 상태를 API로 직접 내보냄, 미실행 시 .drp 파일 복사 폴백
+- **폴더 트리 커스텀 프리셋** — 프로젝트 타입별 폴더 구조를 직접 편집하고 영구 저장
+- **앱 아이콘** — NEXUS 전용 아이콘 (macOS `.icns` / Windows `.ico`)
+
+### v1.0.1
+- 앱 아이콘 추가
+- 스크린샷 업데이트
+
+### v1.0.0
+- 최초 릴리즈

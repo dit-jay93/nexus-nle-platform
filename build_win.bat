@@ -12,6 +12,7 @@ pyinstaller ^
   --onedir ^
   --windowed ^
   --name "%APP_NAME%" ^
+  --icon assets\icon.ico ^
   --clean ^
   main.py
 

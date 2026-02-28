@@ -47,6 +47,7 @@ jobs:
             --onedir `
             --windowed `
             --name NEXUS `
+            --icon assets/icon.ico `
             --clean `
             main.py
         shell: pwsh
@@ -65,6 +66,7 @@ jobs:
             --windowed \
             --name NEXUS \
             --osx-bundle-identifier com.nexus.nleplatform \
+            --icon assets/icon.icns \
             --clean \
             main.py
 
